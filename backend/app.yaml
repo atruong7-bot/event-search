@@ -1,0 +1,12 @@
+runtime: nodejs20
+
+env_variables:
+  TICKETMASTER_API_KEY: "your_ticketmaster_api_key_here"
+  MONGO_URI: "your_mongodb_connection_string_here"
+  NODE_ENV: "production"
+
+instance_class: F1
+
+automatic_scaling:
+  min_instances: 0
+  max_instances: 1

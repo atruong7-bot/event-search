@@ -1,0 +1,203 @@
+```
+SYSTEM:
+You are an expert full-stack web developer. Follow the entire “HW3 Description (CSCI 571 – Fall 2025)” document, including all grading and design requirements. 
+You must build a project matching both the written specification and the visual design shown in the `/reference-images/` folder.
+
+PROJECT OVERVIEW:
+Create a full-stack web app named **"Events Around"** that searches and displays Ticketmaster events with detailed views and favorites, matching the screenshots provided.
+
+FRONTEND:
+- Framework: React 18 + Vite
+- Styling: Tailwind CSS + Shadcn/UI (New York style)
+- Icons: lucide-react
+- Notifications: sonner
+- Routing: react-router-dom
+- API calls: fetch()
+- Mobile responsive (test using Chrome’s iPhone 14 Pro Max view)
+
+BACKEND:
+- Framework: Node.js + Express
+- Database: MongoDB Atlas (favorites collection)
+- Deployment: Google Cloud Run or App Engine
+- All Ticketmaster calls go through backend proxy routes.
+- Include `.env.example`, `Dockerfile` or `app.yaml`, and instructions to deploy.
+
+REFERENCE IMAGES:
+Located in `/reference-images/` directory:
+- `navbar.png` → Navbar layout  
+- `search-form.png` → Search form layout  
+- `auto-detect-location.png` → Disabled location example  
+- `autocomplete.png` → Keyword autosuggest  
+- `autocomplete-json.png` → Example JSON  
+- `search-button.png` → Search button placement  
+- `results-table.png` → Event cards layout  
+- `no-search-result.png` → Empty results page  
+- `json-google-maps.png` → Geocoding response  
+Use these as the visual guide for all styling and spacing.
+
+FEATURE REQUIREMENTS:
+
+1️⃣ Navbar (Persistent)
+- Title: **Events Around**
+- Links: “Search” and “Favorites”
+- Icons: Search + Heart
+- Responsive: collapses into hamburger menu on mobile
+
+2️⃣ Search Route `/search`
+Form fields (5 total):
+1. **Keyword** — text input with Ticketmaster autosuggest (spinner while loading, “×” to clear)
+2. **Category** — dropdown: All, Music, Sports, Arts & Theatre, Film, Miscellaneous
+3. **Location** — text input; disabled when “Auto-detect location” checked
+4. **Auto-detect location** — toggle switch; calls `ipinfo.io`
+5. **Distance** — numeric field with “miles” suffix  
+Buttons:
+- “Search Events” (black button)
+- “Clear” (resets all fields)
+
+Behaviors:
+- Input validation → red border + helper text (see Figure 8)
+- Auto-detect disables Location and fills with geolocation
+- Location manually entered → geocoded using Google Maps API
+- Debounce autosuggest (to reduce API calls)
+- Send GET request to backend `/api/searchEvents?...`
+
+3️⃣ Results Grid
+- Display up to 20 events from Ticketmaster JSON
+- Each card shows:
+  - Category badge
+  - Date/time
+  - Event image
+  - Event name
+  - Venue name
+  - Favorite icon (heart)
+- Sort ascending by date/time
+- Click card → `/event/:id`
+- Empty state → “Nothing found” (see no-search-result.png)
+
+4️⃣ Event Details Page `/event/:id`
+Top bar:
+- “Back to Search” link → restores search and scroll
+- Title, “Buy Tickets” button (Ticketmaster URL)
+- Favorite icon (toggles + toast)
+
+Tabs:
+1. **Info Tab**
+   - Date, Artists/Teams, Venue, Genres, Price Range, Ticket Status (color-coded)
+   - Seat Map
+   - Facebook & X (Twitter) icons → open share links
+2. **Artist Tab**
+   - Only visible for “Music” genre
+   - Use Spotify API: followers, popularity, Spotify link, top albums
+3. **Venue Tab**
+   - Name, Address (Google Maps link), See Events button, Image
+   - Parking, General Rule, Child Rule
+
+Ticket Status color codes:
+- On Sale: Green
+- Off Sale: Red
+- Postponed: Orange
+- Rescheduled: Orange
+- Canceled: Black
+
+5️⃣ Favorites Page `/favorites`
+- Display cards identical to search results
+- Sorted by time added
+- Persist in MongoDB Atlas (ReadWrite user)
+- Empty state: “No favorite events yet”
+- Notifications:
+  - “Added to favorites!”
+  - “Removed from favorites!” (includes Undo)
+  - “Re-added to favorites!”
+
+Use **Sonner** for stackable toasts with hover unstack animation.
+
+6️⃣ Backend API Endpoints
+Use Express.js routes:
+```
+
+GET    /api/suggest?keyword=
+GET    /api/searchEvents?keyword=&radius=&unit=&geoPoint=&segmentId=
+GET    /api/eventDetails/:id
+GET    /api/favorites
+POST   /api/favorites/add
+DELETE /api/favorites/remove/:id
+
+```
+Notes:
+- Only backend can call Ticketmaster API.
+- Frontend can directly call ipinfo.io and Google Geocoding API.
+- Include MongoDB connection (`mongoose` or `mongodb` driver).
+
+7️⃣ Folder Structure
+```
+
+backend/
+├── server.js
+├── routes/
+│   ├── events.js
+│   └── favorites.js
+├── models/Favorite.js
+├── .env.example
+├── package.json
+└── app.yaml
+
+frontend/
+├── public/reference-images/
+├── src/
+│   ├── components/
+│   │   ├── Navbar.jsx
+│   │   ├── SearchForm.jsx
+│   │   ├── ResultsGrid.jsx
+│   │   ├── EventDetails.jsx
+│   │   ├── FavoritesPage.jsx
+│   │   └── ToastNotifications.jsx
+│   ├── pages/
+│   │   ├── Search.jsx
+│   │   ├── Details.jsx
+│   │   └── Favorites.jsx
+│   ├── App.jsx
+│   └── main.jsx
+├── tailwind.config.js
+└── shadcn.config.js
+
+```
+
+8️⃣ Deployment
+- Deploy backend on Google Cloud (Run or App Engine)
+- Serve frontend from same backend domain to avoid CORS
+- Example deployment URL:
+  `https://events-around-12345-uc.a.run.app`
+- Include clear instructions in README
+
+9️⃣ Output
+Generate:
+1. Project folder structure (frontend + backend)
+2. Starter code for backend routes and frontend components
+3. Comments showing where to insert API keys
+4. Example MongoDB schema
+5. Example Tailwind + Shadcn config
+6. Instructions to run locally:
+```
+
+cd backend && npm install && node server.js
+cd frontend && npm install && npm run dev
+
+```
+7. Example .env fields:
+```
+
+TICKETMASTER_API_KEY=
+GOOGLE_GEOCODE_KEY=
+SPOTIFY_CLIENT_ID=
+SPOTIFY_CLIENT_SECRET=
+MONGO_URI=
+
+```
+
+GOAL:
+Produce a **complete working scaffold** that matches:
+- The behavior and appearance in the HW3 PDF
+- The reference images in `/reference-images/`
+- The API behavior defined in sections 5–5.5 of the description  
+Ensure all validation, autosuggest, event details, and favorites persist correctly.
+```
