@@ -13,6 +13,7 @@ const getTicketmasterApiKey = () => {
   }
   return key;
 };
+
 const BASE_URL = 'https://app.ticketmaster.com/discovery/v2';
 
 // Helper function to make Ticketmaster API calls

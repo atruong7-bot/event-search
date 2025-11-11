@@ -41,21 +41,40 @@ router.get('/search/artist/:name', async (req, res) => {
 
     const artist = searchResult.artists.items[0];
 
-    // Get artist's top albums
-    const albumsResult = await client.artists.albums(artist.id, 'album', undefined, 3);
+    // Get full artist details (includes genres)
+    const fullArtist = await client.artists.get(artist.id);
+
+    // Get artist's albums, singles, compilations
+    // Spotify API allows max 50 items per request, so we'll fetch multiple pages if needed
+    let allAlbums = [];
+    let offset = 0;
+    const limit = 50;
+    let hasMore = true;
+
+    while (hasMore && allAlbums.length < 200) { // Cap at 200 total albums to avoid performance issues
+      const albumsResult = await client.artists.albums(artist.id, 'album,single,compilation', undefined, limit, offset);
+      allAlbums = allAlbums.concat(albumsResult.items);
+
+      // Check if there are more albums to fetch
+      hasMore = albumsResult.items.length === limit && albumsResult.total > offset + limit;
+      offset += limit;
+    }
 
     // Format the response
     const artistData = {
-      name: artist.name,
-      followers: artist.followers.total,
-      popularity: artist.popularity,
-      spotifyUrl: artist.external_urls.spotify,
-      imageUrl: artist.images[0]?.url || '',
-      albums: albumsResult.items.map(album => ({
+      name: fullArtist.name,
+      followers: fullArtist.followers.total,
+      popularity: fullArtist.popularity,
+      spotifyUrl: fullArtist.external_urls.spotify,
+      imageUrl: fullArtist.images[0]?.url || '',
+      genres: fullArtist.genres || [],
+      albums: allAlbums.map(album => ({
         name: album.name,
         imageUrl: album.images[0]?.url || '',
         releaseDate: album.release_date,
+        totalTracks: album.total_tracks,
         spotifyUrl: album.external_urls.spotify,
+        albumType: album.album_type, // Include album type (album, single, compilation)
       })),
     };
 

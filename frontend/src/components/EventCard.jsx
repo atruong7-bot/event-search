@@ -10,6 +10,30 @@ export function EventCard({ event }) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isCheckingFavorite, setIsCheckingFavorite] = useState(true);
 
+  // Format date and time like: "Oct 25, 2026, 05:30 PM"
+  const formatDateTime = () => {
+    if (!event.date) return '';
+
+    const dateObj = new Date(event.date);
+    const dateStr = dateObj.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+
+    if (event.time) {
+      // Parse time in HH:MM format and convert to 12-hour format with AM/PM
+      const [hours, minutes] = event.time.split(':');
+      const hour = parseInt(hours);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const hour12 = hour % 12 || 12;
+      const timeStr = `${String(hour12).padStart(2, '0')}:${minutes} ${ampm}`;
+      return `${dateStr}, ${timeStr}`;
+    }
+
+    return dateStr;
+  };
+
   useEffect(() => {
     checkIfFavorite();
   }, [event.eventId]);
@@ -76,6 +100,9 @@ export function EventCard({ event }) {
   };
 
   const handleCardClick = () => {
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.setItem('searchScrollPosition', String(window.scrollY));
+    }
     navigate(`/event/${event.eventId}`);
   };
 
@@ -96,7 +123,7 @@ export function EventCard({ event }) {
           </Badge>
         </div>
         <div className="absolute top-3 right-3 bg-white/95 px-2 py-1 rounded text-xs font-medium shadow-sm">
-          {event.date} {event.time && `${event.time}`}
+          {formatDateTime()}
         </div>
         <button
           onClick={handleFavoriteClick}
