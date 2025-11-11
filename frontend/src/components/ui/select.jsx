@@ -163,13 +163,18 @@ const Autocomplete = React.forwardRef(
           <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-50 pointer-events-none flex items-center justify-center">
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
-            ) : showSuggestions && suggestions.length > 0 ? (
+            ) : showSuggestions ? (
               <ChevronUp className="h-4 w-4" />
             ) : (
               <ChevronDown className="h-4 w-4" />
             )}
           </div>
         </div>
+        {showSuggestions && !inputValue && !isLoading && (
+          <div className="absolute z-50 w-full mt-1 bg-popover border border-input rounded-md shadow-md p-3 text-sm text-muted-foreground">
+            Start typing to see options
+          </div>
+        )}
         {showSuggestions && suggestions.length > 0 && (
           <div className="absolute z-50 w-full mt-1 bg-popover border border-input rounded-md shadow-md max-h-60 overflow-auto">
             {suggestions.map((suggestion, index) => (

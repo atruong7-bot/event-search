@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
-export function EventCard({ event }) {
+export function EventCard({ event, onFavoriteChange }) {
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isCheckingFavorite, setIsCheckingFavorite] = useState(true);
@@ -62,13 +62,35 @@ export function EventCard({ event }) {
 
         if (response.ok) {
           setIsFavorite(false);
-          toast(`${event.name} removed from favorites!`, {
-            icon: 'ℹ️',
+          // Notify parent component (FavoritesPage) that this item was removed
+          if (onFavoriteChange) {
+            onFavoriteChange(event.eventId, false);
+          }
+
+          toast.info(`${event.name} removed from favorites!`, {
             action: {
               label: 'Undo',
               onClick: async () => {
-                await handleFavoriteClick(e);
-                toast.success(`${event.name} added to favorites!`);
+                // Re-add to favorites
+                try {
+                  const addResponse = await fetch('/api/favorites', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(event),
+                  });
+                  if (addResponse.ok) {
+                    setIsFavorite(true);
+                    // Notify parent that item was re-added
+                    if (onFavoriteChange) {
+                      onFavoriteChange(event.eventId, true);
+                    }
+                    toast.success(`${event.name} re-added to favorites!`, {
+                      description: 'You can view it in the Favorites page.',
+                    });
+                  }
+                } catch (error) {
+                  console.error('Error re-adding favorite:', error);
+                }
               },
             },
           });
@@ -88,6 +110,10 @@ export function EventCard({ event }) {
 
         if (response.ok) {
           setIsFavorite(true);
+          // Notify parent that item was added
+          if (onFavoriteChange) {
+            onFavoriteChange(event.eventId, true);
+          }
           toast.success(`${event.name} added to favorites!`, {
             description: 'You can view it in the Favorites page.',
           });
@@ -128,7 +154,7 @@ export function EventCard({ event }) {
         <button
           onClick={handleFavoriteClick}
           disabled={isCheckingFavorite}
-          className="absolute bottom-3 right-3 p-2 rounded-full bg-white hover:bg-gray-50 transition-colors shadow-md"
+          className="absolute bottom-3 right-3 p-2 rounded-xl bg-white hover:bg-gray-50 transition-colors shadow-md"
           aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
         >
           <Heart

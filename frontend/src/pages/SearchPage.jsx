@@ -1,11 +1,48 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { SearchForm } from '../components/SearchForm';
 import { ResultsGrid } from '../components/ResultsGrid';
 
+const RESULTS_STORAGE_KEY = 'searchResultsState';
+const SCROLL_STORAGE_KEY = 'searchScrollPosition';
+
 export function SearchPage() {
-  const [events, setEvents] = useState([]);
+  const storedState = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const saved = window.sessionStorage.getItem(RESULTS_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const [events, setEvents] = useState(storedState?.events || []);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
+  const [hasSearched, setHasSearched] = useState(storedState?.hasSearched || false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const savedScroll = window.sessionStorage.getItem(SCROLL_STORAGE_KEY);
+    if (savedScroll !== null) {
+      window.requestAnimationFrame(() => {
+        window.scrollTo(0, Number(savedScroll));
+        window.sessionStorage.removeItem(SCROLL_STORAGE_KEY);
+      });
+    }
+  }, []);
+
+  const persistResultsState = useCallback((nextEvents, searched) => {
+    if (typeof window === 'undefined') return;
+    const state = {
+      events: nextEvents,
+      hasSearched: searched,
+    };
+    try {
+      window.sessionStorage.setItem(RESULTS_STORAGE_KEY, JSON.stringify(state));
+    } catch (error) {
+      console.warn('Failed to persist search results state', error);
+    }
+  }, []);
 
   const handleSearch = async (params) => {
     setIsLoading(true);
@@ -49,9 +86,15 @@ export function SearchPage() {
       }
 
       setEvents(parsedEvents);
+      persistResultsState(parsedEvents, true);
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.removeItem(SCROLL_STORAGE_KEY);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     } catch (error) {
       console.error('Error searching events:', error);
       setEvents([]);
+      persistResultsState([], true);
     } finally {
       setIsLoading(false);
     }

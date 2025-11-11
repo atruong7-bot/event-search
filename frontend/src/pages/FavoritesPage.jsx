@@ -34,6 +34,18 @@ export function FavoritesPage() {
     }
   };
 
+  const handleFavoriteChange = (eventId, isFavorite) => {
+    if (isFavorite) {
+      // Re-fetch to get the updated list when an item is re-added
+      fetchFavorites();
+    } else {
+      // Remove the item from the list immediately
+      setFavorites(prevFavorites =>
+        prevFavorites.filter(event => event.eventId !== eventId)
+      );
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-4">
@@ -63,7 +75,11 @@ export function FavoritesPage() {
       <h1 className="text-3xl font-bold">Favorites</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {favorites.map((event) => (
-          <EventCard key={event.eventId} event={event} />
+          <EventCard
+            key={event.eventId}
+            event={event}
+            onFavoriteChange={handleFavoriteChange}
+          />
         ))}
       </div>
     </div>

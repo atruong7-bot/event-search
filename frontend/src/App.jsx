@@ -18,7 +18,17 @@ function App() {
             <Route path="/favorites" element={<FavoritesPage />} />
           </Routes>
         </main>
-        <Toaster position="top-right" richColors />
+        <Toaster
+          position="top-right"
+          expand={false}
+          closeButton={false}
+          toastOptions={{
+            style: {
+              background: 'white',
+              border: '1px solid #e5e7eb',
+            },
+          }}
+        />
       </div>
     </BrowserRouter>
   );
