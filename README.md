@@ -2,6 +2,7 @@
 
 A full-stack web application for searching and discovering events using the Ticketmaster API. Built with React + TypeScript + Vite on the frontend and Node.js + Express + MongoDB on the backend.
 
+DEPLOYED HERE: https://event-search-477822.wl.r.appspot.com/search
 ## Features
 
 - 🔍 Event search with keyword autocomplete
