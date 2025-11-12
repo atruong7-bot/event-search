@@ -17,7 +17,7 @@ DEPLOYED HERE: https://event-search-477822.wl.r.appspot.com/search
 ## Tech Stack
 
 ### Frontend
-- React 18+ with TypeScript
+- React 18+ with JavaScript
 - Vite for build tooling
 - Tailwind CSS + Shadcn/UI for styling
 - React Router for routing
