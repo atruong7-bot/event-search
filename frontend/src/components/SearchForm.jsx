@@ -423,8 +423,11 @@ export function SearchForm({ onSearch, isLoading }) {
           <div className="relative">
             <Input
               id="distance"
-              type="text"
+              type="number"
               placeholder="10"
+              min="1"
+              max="100"
+              step="1"
               value={distance}
               onChange={(e) => handleDistanceChange(e.target.value)}
               className={`pr-14 ${errors.distance ? "border-red-500" : ""}`}
