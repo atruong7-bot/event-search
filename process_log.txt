@@ -1,0 +1,33 @@
+Prompt: "In the Artist Info section, space out the details and make the artist image larger. The layout looks cramped and the text alignment feels uneven."
+
+Issue: The artist information layout was vertically stacked with small image (w-20 h-20) and basic text formatting, making it feel cramped and inconsistent with the assignment's reference design.
+
+Code (Before):
+<div className="flex items-center gap-3">
+  <img src={spotifyData.imageUrl} alt={spotifyData.name} className="w-20 h-20 rounded-full" />
+  <div>
+    <p>Followers: {spotifyData.followers}</p>
+    <p>Popularity: {spotifyData.popularity}</p>
+    <p>Genres: {spotifyData.genres.join(', ')}</p>
+  </div>
+</div>
+
+Prompt: "Make the layout more inline and compact, Followers and Popularity should be on the same line, Genres below. Increase image size slightly and bold the labels."
+
+Fix: Increased image size to w-24 h-24, made Followers and Popularity appear on the same line with bold labels, placed Genres on a separate line below, and added an "Open in Spotify" button for better usability.
+
+Code (After):
+<div className="flex gap-3 items-center">
+  <img src={spotifyData.imageUrl} alt={spotifyData.name} className="w-24 h-24 rounded object-cover" />
+  <div>
+    <p><span className="font-semibold">Followers: </span>{spotifyData.followers.toLocaleString()}
+       <span className="ml-4 font-semibold">Popularity: </span>{spotifyData.popularity}%</p>
+    <p className="mt-1"><span className="font-semibold">Genres: </span>{spotifyData.genres.join(', ')}</p>
+    <a href={spotifyData.spotifyUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black text-white rounded text-xs font-medium">
+      Open in Spotify
+    </a>
+  </div>
+</div>
+
+Explanation:
+I adjusted the Artist Info section to better match the assignment's reference design by increasing the artist image size from 80px to 96px and reorganizing the layout. Followers and Popularity now appear inline on the same row with bold labels for better scannability, while Genres displays on a separate line below. The addition of proper formatting (toLocaleString for followers, percentage symbol for popularity) and a styled Spotify link button improves both visual hierarchy and user experience, making the section more polished and consistent with modern UI patterns.

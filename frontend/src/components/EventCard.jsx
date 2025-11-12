@@ -14,7 +14,11 @@ export function EventCard({ event, onFavoriteChange }) {
   const formatDateTime = () => {
     if (!event.date) return '';
 
-    const dateObj = new Date(event.date);
+    // Parse date string manually to avoid timezone issues
+    // event.date is in format "YYYY-MM-DD"
+    const [year, month, day] = event.date.split('-').map(Number);
+    const dateObj = new Date(year, month - 1, day); // month is 0-indexed
+
     const dateStr = dateObj.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
@@ -151,23 +155,25 @@ export function EventCard({ event, onFavoriteChange }) {
         <div className="absolute top-3 right-3 bg-white/95 px-2 py-1 rounded text-xs font-medium shadow-sm">
           {formatDateTime()}
         </div>
-        <button
-          onClick={handleFavoriteClick}
-          disabled={isCheckingFavorite}
-          className="absolute bottom-3 right-3 p-2 rounded-xl bg-white hover:bg-gray-50 transition-colors shadow-md"
-          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-        >
-          <Heart
-            className={`w-5 h-5 ${
-              isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-700'
-            }`}
-          />
-        </button>
       </div>
       <div className="p-4 space-y-2">
-        <h3 className="font-bold text-base line-clamp-2 group-hover:text-primary transition-colors">
-          {event.name}
-        </h3>
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="font-bold text-base line-clamp-2 group-hover:text-primary transition-colors flex-1">
+            {event.name}
+          </h3>
+          <button
+            onClick={handleFavoriteClick}
+            disabled={isCheckingFavorite}
+            className="flex-shrink-0 p-1.5 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          >
+            <Heart
+              className={`w-5 h-5 ${
+                isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-700'
+              }`}
+            />
+          </button>
+        </div>
         <p className="text-sm text-muted-foreground line-clamp-1">{event.venue}</p>
       </div>
     </Card>

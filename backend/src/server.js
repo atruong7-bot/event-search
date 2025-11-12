@@ -31,12 +31,41 @@ app.get('/api/health', (req, res) => {
 });
 
 // Serve static files from the frontend build (for production)
-const frontendPath = path.join(__dirname, '../../frontend/dist');
+// Try multiple paths to find the frontend build
+const possiblePaths = [
+  path.join(__dirname, '../public'),           // Production: backend/public (copied during build)
+  path.join(__dirname, '../../frontend/dist'), // Development: from src/
+];
+
+let frontendPath = possiblePaths[0];
+for (const p of possiblePaths) {
+  try {
+    if (require('fs').existsSync(path.join(p, 'index.html'))) {
+      frontendPath = p;
+      break;
+    }
+  } catch (e) {
+    // Continue checking
+  }
+}
+
+console.log('Frontend path:', frontendPath);
 app.use(express.static(frontendPath));
 
-// Catch-all to support client-side routing
-app.use((req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
+// Catch-all to support client-side routing (must be after API routes)
+app.use((req, res, next) => {
+  // Skip if it's an API route
+  if (req.path.startsWith('/api/')) {
+    return next();
+  }
+  const indexPath = path.join(frontendPath, 'index.html');
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error('Error serving index.html:', err);
+      console.error('Tried path:', indexPath);
+      next(err);
+    }
+  });
 });
 
 // Error handling middleware

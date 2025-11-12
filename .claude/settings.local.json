@@ -1,9 +1,17 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install:*)",
-      "Bash(npx tailwindcss init -p)",
-      "Bash(npm cache clean:*)"
+      "Bash(find:*)",
+      "Bash(xargs:*)",
+      "Bash(npm run build:*)",
+      "Bash(chmod:*)",
+      "Bash(gcloud:*)",
+      "Bash(git rm:*)",
+      "Bash(gsutil mb:*)",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(sort:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

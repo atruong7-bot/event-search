@@ -26,6 +26,7 @@ function App() {
             style: {
               background: 'white',
               border: '1px solid #e5e7eb',
+              userSelect: 'none',
             },
           }}
         />

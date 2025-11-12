@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Search, Heart, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
@@ -8,7 +8,6 @@ const SCROLL_STORAGE_KEY = 'searchScrollPosition';
 
 export function Navbar() {
   const location = useLocation();
-  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isActive = (path) => {
@@ -35,7 +34,7 @@ export function Navbar() {
           <a
             href="/search"
             onClick={handleLogoClick}
-            className="text-2xl font-bold text-gray-900 cursor-pointer"
+            className="text-xl md:text-2xl font-bold text-gray-900 cursor-pointer"
           >
             Events Around
           </a>
@@ -80,15 +79,15 @@ export function Navbar() {
           </button>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation Dropdown */}
         {mobileMenuOpen && (
           <div className="md:hidden mt-4 pb-2 space-y-2">
             <Link
               to="/search"
-              className={`flex items-center gap-2 py-2 px-3 rounded-md text-sm ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
                 isActive('/search')
-                  ? 'bg-black text-white font-bold'
-                  : 'text-gray-600 font-medium hover:bg-gray-100'
+                  ? 'bg-gray-100 text-black font-bold'
+                  : 'text-gray-600 font-medium hover:bg-gray-50'
               }`}
               onClick={() => setMobileMenuOpen(false)}
             >
@@ -97,10 +96,10 @@ export function Navbar() {
             </Link>
             <Link
               to="/favorites"
-              className={`flex items-center gap-2 py-2 px-3 rounded-md text-sm ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
                 isActive('/favorites')
-                  ? 'bg-black text-white font-bold'
-                  : 'text-gray-600 font-medium hover:bg-gray-100'
+                  ? 'bg-gray-100 text-black font-bold'
+                  : 'text-gray-600 font-medium hover:bg-gray-50'
               }`}
               onClick={() => setMobileMenuOpen(false)}
             >

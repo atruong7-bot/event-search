@@ -25,9 +25,7 @@ export function ResultsGrid({ events, isLoading, hasSearched }) {
   if (events.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 bg-white rounded-lg shadow-sm space-y-4">
-        <div className="flex items-center justify-center h-16 w-16 rounded-full bg-gray-100 text-gray-400">
-          <Search className="h-8 w-8" aria-hidden="true" />
-        </div>
+        <Search className="h-12 w-12 text-gray-400" aria-hidden="true" />
         <div className="text-center space-y-1">
           <h3 className="text-xl font-semibold text-gray-900">Nothing found</h3>
           <p className="text-muted-foreground">

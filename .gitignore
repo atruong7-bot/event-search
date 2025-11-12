@@ -3,7 +3,7 @@ node_modules/
 backend/node_modules/
 frontend/node_modules/
 
-# Environment variables
+# Environment variables (NEVER commit secrets!)
 .env
 .env.local
 .env.production
@@ -14,17 +14,19 @@ frontend/.env
 frontend/.env.*
 *.local
 
-# Secrets / keys
+# Secrets / API keys (CRITICAL - NEVER commit!)
 .claude/
 app.yaml
+backend/app.yaml
 
-# Spec assets
+# Assignment reference assets
 reference-images/
 
 # Build outputs
 dist/
 build/
 backend/dist/
+backend/public/
 frontend/dist/
 coverage/
 *.tsbuildinfo
@@ -44,7 +46,7 @@ yarn-error.log*
 .Trashes
 Thumbs.db
 
-# IDE
+# IDE files
 .vscode/
 .idea/
 *.swp
@@ -52,9 +54,26 @@ Thumbs.db
 *~
 *.bak
 
-# Containers / deployment overrides
+# Deployment files (contain secrets)
 docker-compose.override.yml
-backend/app.yaml
+Dockerfile
+.dockerignore
+
+# Temporary/working documentation
+DEPLOYMENT.md
+DEPLOYMENT_SUCCESS.md
+DEPLOY_CHECKLIST.md
+MONGODB_FIX.md
+MONGODB_NETWORK_ACCESS.md
+deploy.sh
+deploy-simple.sh
+prompt.txt
+
+# Submission files
+hw3-submission.zip
+hw3-submission.tar.gz
+*.zip
+*.tar.gz
 
 # Misc
 *.tgz

@@ -13,8 +13,21 @@ import { toast } from "sonner";
 
 const formatDateTime = (date, time) => {
   if (!date) return "TBA";
-  const isoString = time ? `${date}T${time}` : `${date}T00:00:00`;
-  const parsed = new Date(isoString);
+
+  // Parse date string manually to avoid timezone issues
+  // date is in format "YYYY-MM-DD"
+  const [year, month, day] = date.split('-').map(Number);
+
+  // Parse time if available (format "HH:MM:SS" or "HH:MM")
+  let hours = 0, minutes = 0;
+  if (time) {
+    const timeParts = time.split(':');
+    hours = parseInt(timeParts[0]);
+    minutes = parseInt(timeParts[1]);
+  }
+
+  // Create date in local timezone
+  const parsed = new Date(year, month - 1, day, hours, minutes);
 
   if (Number.isNaN(parsed.getTime())) {
     return `${date}${time ? `, ${time}` : ""}`;
@@ -42,6 +55,12 @@ export function EventDetailsPage() {
 
   useEffect(() => {
     if (id) {
+      // Reset state when navigating to a new event
+      // Don't reset eventDetails to null - let loading state handle the UI
+      setSpotifyData(null);
+      setActiveTab("info");
+      setIsLoading(true); // Set loading immediately to prevent flash
+
       fetchEventDetails(id);
       checkIfFavorite(id);
     }
@@ -56,7 +75,7 @@ export function EventDetailsPage() {
         fetchSpotifyData(eventDetails.artists[0]);
       }
     }
-  }, [activeTab, eventDetails]);
+  }, [activeTab, eventDetails, spotifyData]);
 
   const fetchEventDetails = async (eventId) => {
     setIsLoading(true);
@@ -116,6 +135,7 @@ export function EventDetailsPage() {
           lng: parseFloat(venue.location?.longitude),
           parkingDetail: venue.parkingDetail,
           imageUrl: venue.images?.[0]?.url,
+          venueUrl: venue.url, // Ticketmaster venue URL
         };
       }
 
@@ -306,7 +326,7 @@ export function EventDetailsPage() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div>
       {/* Header Section */}
       <div className="mb-6">
         <button
@@ -360,12 +380,8 @@ export function EventDetailsPage() {
         >
           <TabsTrigger
             value="info"
-            className={`flex-1 h-7 rounded-md text-sm transition-all
-                 ${
-                   activeTab === "info"
-                     ? "bg-white !text-black shadow-sm"
-                     : "text-gray-400"
-                 }`}
+            className={`flex-1 h-7 rounded-md text-sm transition-all text-black
+                 ${activeTab === "info" ? "bg-white shadow-sm" : ""}`}
           >
             Info
           </TabsTrigger>
@@ -373,12 +389,8 @@ export function EventDetailsPage() {
           <TabsTrigger
             value="artists"
             disabled={!isMusic}
-            className={`flex-1 h-7 rounded-md text-sm transition-all
-                 ${
-                   activeTab === "artists"
-                     ? "bg-white !text-black shadow-sm"
-                     : "text-gray-400"
-                 }
+            className={`flex-1 h-7 rounded-md text-sm transition-all text-black
+                 ${activeTab === "artists" ? "bg-white shadow-sm" : ""}
                  disabled:opacity-40 disabled:cursor-not-allowed`}
           >
             Artist
@@ -386,12 +398,8 @@ export function EventDetailsPage() {
 
           <TabsTrigger
             value="venue"
-            className={`flex-1 h-7 rounded-md text-sm transition-all
-                 ${
-                   activeTab === "venue"
-                     ? "bg-white !text-black shadow-sm"
-                     : "text-gray-400"
-                 }`}
+            className={`flex-1 h-7 rounded-md text-sm transition-all text-black
+                 ${activeTab === "venue" ? "bg-white shadow-sm" : ""}`}
           >
             Venue
           </TabsTrigger>
@@ -401,48 +409,50 @@ export function EventDetailsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4">
               <div>
-                <h3 className="font-semibold text-sm mb-1">Date</h3>
-                <p className="text-sm">
+                <h3 className="font-semibold text-sm mb-1 text-gray-600">Date</h3>
+                <p className="text-sm text-black">
                   {formatDateTime(eventDetails.date, eventDetails.time)}
                 </p>
               </div>
 
               {eventDetails.artists.length > 0 && (
                 <div>
-                  <h3 className="font-semibold text-sm mb-1">Artist/Team</h3>
-                  <p className="text-sm">{eventDetails.artists.join(", ")}</p>
+                  <h3 className="font-semibold text-sm mb-1 text-gray-600">Artist/Team</h3>
+                  <p className="text-sm text-black">{eventDetails.artists.join(", ")}</p>
                 </div>
               )}
 
               <div>
-                <h3 className="font-semibold text-sm mb-1">Venue</h3>
-                <p className="text-sm">{eventDetails.venue}</p>
+                <h3 className="font-semibold text-sm mb-1 text-gray-600">Venue</h3>
+                <p className="text-sm text-black">{eventDetails.venue}</p>
               </div>
 
               {eventDetails.genres.length > 0 &&
-               !eventDetails.genres.every(g => g.toLowerCase() === 'n/a') && (
-                <div>
-                  <h3 className="font-semibold text-sm mb-1">Genres</h3>
-                  <p className="text-sm">{eventDetails.genres.join(", ")}</p>
-                </div>
-              )}
+                !eventDetails.genres.every(
+                  (g) => g.toLowerCase() === "n/a"
+                ) && (
+                  <div>
+                    <h3 className="font-semibold text-sm mb-1 text-gray-600">Genres</h3>
+                    <p className="text-sm text-black">{eventDetails.genres.join(", ")}</p>
+                  </div>
+                )}
 
               {eventDetails.priceRange && (
                 <div>
-                  <h3 className="font-semibold text-sm mb-1">Price Range</h3>
-                  <p className="text-sm">{eventDetails.priceRange}</p>
+                  <h3 className="font-semibold text-sm mb-1 text-gray-600">Price Range</h3>
+                  <p className="text-sm text-black">{eventDetails.priceRange}</p>
                 </div>
               )}
 
               <div>
-                <h3 className="font-semibold text-sm mb-1">Ticket Status</h3>
+                <h3 className="font-semibold text-sm mb-1 text-gray-600">Ticket Status</h3>
                 <Badge className={getStatusColor(eventDetails.ticketStatus)}>
                   {getStatusLabel(eventDetails.ticketStatus)}
                 </Badge>
               </div>
 
               <div>
-                <h3 className="font-semibold text-sm mb-2">Share</h3>
+                <h3 className="font-semibold text-sm mb-2 text-gray-600">Share</h3>
                 <div className="flex gap-2 items-center">
                   <button
                     onClick={shareOnFacebook}
@@ -475,7 +485,7 @@ export function EventDetailsPage() {
             </div>
 
             <div className="space-y-4">
-              <h3 className="font-semibold text-sm">Seatmap</h3>
+              <h3 className="font-semibold text-sm text-gray-600">Seatmap</h3>
               {eventDetails.seatMapUrl ? (
                 <div className="border border-gray-200 rounded-lg p-4 flex items-center justify-center bg-white">
                   <img
@@ -508,24 +518,25 @@ export function EventDetailsPage() {
                     <img
                       src={spotifyData.imageUrl}
                       alt={spotifyData.name}
-                      className="w-20 h-20 rounded object-cover"
+                      className="w-24 h-24 rounded object-cover"
                     />
                   </div>
                 )}
 
                 {/* Artist Details - Inline */}
                 <div className="flex-1">
-                  <h3 className="text-base font-bold leading-tight">
+                  <h3 className="text-base font-bold mb-0.5">
                     {spotifyData.name}
                   </h3>
-                  <p className="text-xs text-gray-700 leading-tight">
+                  <p className="text-xs text-gray-700 mb-0.5">
                     <span className="font-semibold">Followers: </span>
                     {spotifyData.followers.toLocaleString()}
-                    <span className="mx-2">•</span>
-                    <span className="font-semibold">Popularity: </span>
-                    {spotifyData.popularity}%
+                    <span className="ml-4">
+                      <span className="font-semibold">Popularity: </span>
+                      {spotifyData.popularity}%
+                    </span>
                   </p>
-                  <p className="text-xs text-gray-700 leading-tight">
+                  <p className="text-xs text-gray-700 mb-1.5">
                     <span className="font-semibold">Genres: </span>
                     {spotifyData.genres && spotifyData.genres.length > 0
                       ? spotifyData.genres.join(", ")
@@ -536,7 +547,7 @@ export function EventDetailsPage() {
                       href={spotifyData.spotifyUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black text-white rounded text-xs font-medium hover:bg-gray-800 transition-colors whitespace-nowrap mt-1"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black text-white rounded text-xs font-medium hover:bg-gray-800 transition-colors whitespace-nowrap"
                     >
                       Open in Spotify
                       <ExternalLink className="w-3 h-3" />
@@ -591,22 +602,11 @@ export function EventDetailsPage() {
 
         <TabsContent value="venue" className="mt-6">
           {eventDetails.venueInfo ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Left Column - Venue Image */}
-              {eventDetails.venueInfo.imageUrl && (
-                <div>
-                  <img
-                    src={eventDetails.venueInfo.imageUrl}
-                    alt={eventDetails.venueInfo.name}
-                    className="w-full rounded-lg"
-                  />
-                </div>
-              )}
-
-              {/* Right Column - Venue Details */}
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-bold text-lg mb-2">
+            <div className="space-y-4">
+              {/* Header with name, address, and See Events button */}
+              <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-3 md:gap-4">
+                <div className="flex-1">
+                  <h3 className="font-bold text-xl mb-1">
                     {eventDetails.venueInfo.name}
                   </h3>
                   {eventDetails.venueInfo.lat && eventDetails.venueInfo.lng ? (
@@ -614,66 +614,89 @@ export function EventDetailsPage() {
                       href={`https://www.google.com/maps?q=${eventDetails.venueInfo.lat},${eventDetails.venueInfo.lng}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline text-sm"
+                      className="text-base text-gray-600 inline-flex items-center gap-1 hover:opacity-70"
                     >
-                      {eventDetails.venueInfo.address},{" "}
-                      {eventDetails.venueInfo.cityState}
+                      <span>
+                        {eventDetails.venueInfo.address
+                          ? `${eventDetails.venueInfo.address}, ${eventDetails.venueInfo.cityState}`
+                          : eventDetails.venueInfo.cityState}
+                      </span>
+                      <ExternalLink className="w-4 h-4" />
                     </a>
                   ) : (
-                    <p className="text-sm">
-                      {eventDetails.venueInfo.address},{" "}
-                      {eventDetails.venueInfo.cityState}
+                    <p className="text-base text-gray-600">
+                      {eventDetails.venueInfo.address
+                        ? `${eventDetails.venueInfo.address}, ${eventDetails.venueInfo.cityState}`
+                        : eventDetails.venueInfo.cityState}
                     </p>
                   )}
                 </div>
 
-                {eventDetails.buyTicketUrl && (
-                  <div>
-                    <a
-                      href={eventDetails.buyTicketUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                {eventDetails.venueInfo.venueUrl && (
+                  <a
+                    href={eventDetails.venueInfo.venueUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="self-start"
+                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full md:w-auto"
                     >
-                      <Button variant="outline" size="sm">
-                        See Events
-                        <ExternalLink className="w-4 h-4 ml-2" />
-                      </Button>
-                    </a>
+                      See Events
+                      <ExternalLink className="w-4 h-4 ml-2" />
+                    </Button>
+                  </a>
+                )}
+              </div>
+
+              {/* Venue Image and Details Layout */}
+              <div className="flex flex-col md:flex-row gap-6">
+                {/* Left Column - Venue Image */}
+                {eventDetails.venueInfo.imageUrl && (
+                  <div className="flex-shrink-0 w-full md:w-auto">
+                    <img
+                      src={eventDetails.venueInfo.imageUrl}
+                      alt={eventDetails.venueInfo.name}
+                      className="w-full md:w-200 h-auto md:h-64 object-cover border border-gray-300 rounded-lg"
+                    />
                   </div>
                 )}
 
-                {eventDetails.venueInfo.parkingDetail && (
-                  <div>
-                    <h3 className="font-semibold text-gray-700 mb-1">
-                      Parking
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {eventDetails.venueInfo.parkingDetail}
-                    </p>
-                  </div>
-                )}
+                {/* Right Column - Venue Details */}
+                <div className="flex-1 space-y-6">
+                  {eventDetails.venueInfo.parkingDetail && (
+                    <div>
+                      <h3 className="text-base mb-1 text-gray-700">Parking</h3>
+                      <p className="text-sm text-black">
+                        {eventDetails.venueInfo.parkingDetail}
+                      </p>
+                    </div>
+                  )}
 
-                {eventDetails.venueInfo.generalRule && (
-                  <div>
-                    <h3 className="font-semibold text-gray-700 mb-1">
-                      General Rule
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {eventDetails.venueInfo.generalRule}
-                    </p>
-                  </div>
-                )}
+                  {eventDetails.venueInfo.generalRule && (
+                    <div>
+                      <h3 className="text-base mb-1 text-gray-700">
+                        General Rule
+                      </h3>
+                      <p className="text-sm text-black">
+                        {eventDetails.venueInfo.generalRule}
+                      </p>
+                    </div>
+                  )}
 
-                {eventDetails.venueInfo.childRule && (
-                  <div>
-                    <h3 className="font-semibold text-gray-700 mb-1">
-                      Child Rule
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {eventDetails.venueInfo.childRule}
-                    </p>
-                  </div>
-                )}
+                  {eventDetails.venueInfo.childRule && (
+                    <div>
+                      <h3 className="text-base mb-1 text-gray-700">
+                        Child Rule
+                      </h3>
+                      <p className="text-sm text-black">
+                        {eventDetails.venueInfo.childRule}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ) : (
